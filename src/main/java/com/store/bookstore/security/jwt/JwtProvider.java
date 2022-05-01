@@ -28,6 +28,8 @@ public class JwtProvider implements IJwtProvider {
     @Value("${jwt.expiration.ms}")
     private String JWT_EXPIRATION_MS;
 
+
+    @Override
     public String generateToken(UserPrincipal auth) {
         String authorities = auth.getAuthorities()
                 .stream()
@@ -39,20 +41,20 @@ public class JwtProvider implements IJwtProvider {
                 .claim("roles", authorities)
                 .claim("userId", auth.getId())
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION_MS))
-                .signWith(SignatureAlgorithm.HS512,JWT_SECRET)
+                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
                 .compact();
     }
 
-   @Override
-    public Authentication getAuthentication(HttpServletRequest request){
-Claims claims = extractClaim(request);
+    @Override
+    public Authentication getAuthentication(HttpServletRequest request) {
+        Claims claims = extractClaim(request);
 
-       if(claims == null){
-           return  null;
-       }
+        if (claims == null) {
+            return null;
+        }
 
-String username = claims.getSubject();
-Long userId = claims.get("userId" , Long.class);
+        String username = claims.getSubject();
+        Long userId = claims.get("userId", Long.class);
         Set<GrantedAuthority> authorities = Arrays.stream(claims.get("roles").toString().split(","))
                 .map(SecurityUtils::convertToAuthority)
                 .collect(Collectors.toSet());
@@ -62,24 +64,24 @@ Long userId = claims.get("userId" , Long.class);
                 .id(userId)
                 .build();
 
-        if(username == null){
+        if (username == null) {
             return null;
         }
-        return new UsernamePasswordAuthenticationToken(userDetails , null , authorities);
+        return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
     }
 
     @Override
-
-    public  boolean validateToken(HttpServletRequest request){
+    public boolean validateToken(HttpServletRequest request) {
         Claims claims = extractClaim(request);
-        if(claims == null){
-            return  false;
+        if (claims == null) {
+            return false;
         }
-    return !claims.getExpiration().before(new Date());
-}
-    public Claims extractClaim(HttpServletRequest request){
+        return !claims.getExpiration().before(new Date());
+    }
+
+    public Claims extractClaim(HttpServletRequest request) {
         String token = SecurityUtils.extractAuthTokenFromRequests(request);
-        if(token == null ){
+        if (token == null) {
             return null;
         }
         return Jwts.parser()
