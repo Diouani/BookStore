@@ -5,6 +5,7 @@ import com.store.bookstore.model.User;
 import com.store.bookstore.service.IAuthenticationService;
 import com.store.bookstore.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +30,9 @@ public class AuthenticationController {
     public ResponseEntity<User> SignUp(@RequestBody User user){
 
 
+userService.saveUser(user);
 
+return new ResponseEntity<User>(HttpStatus.CREATED);
 
 
     }
