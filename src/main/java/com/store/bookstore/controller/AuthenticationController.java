@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-
 @RestController
 @RequestMapping("api/authentication")
 public class AuthenticationController {
@@ -27,13 +26,15 @@ public class AuthenticationController {
     }
 
     @PostMapping("sign-up")
-    public ResponseEntity<User> SignUp(@RequestBody User user){
+    public ResponseEntity<?> signUp(@RequestBody User user) {
+        if (userService.findByUsername(user.getUsername()).isPresent()) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(userService.saveUser(user), HttpStatus.CREATED);
+    }
 
-
-userService.saveUser(user);
-
-return new ResponseEntity<User>(HttpStatus.CREATED);
-
-
+    @PostMapping("sign-in")
+    public ResponseEntity<?> signIn(@RequestBody User user) {
+        return new ResponseEntity<>(authenticationService.signIn(user), HttpStatus.OK);
     }
 }
